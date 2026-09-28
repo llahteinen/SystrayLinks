@@ -6,6 +6,6 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainDialog w;
-    w.show();
+//    w.show(); /// Start with main window hidden
     return QApplication::exec();
 }

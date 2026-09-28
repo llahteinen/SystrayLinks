@@ -5,6 +5,8 @@ qt_add_executable(${PROJECT_NAME}
     maindialog.cpp
     maindialog.hpp
     maindialog.ui
+    tray.cpp
+    tray.hpp
 )
 
 target_link_libraries(${PROJECT_NAME}

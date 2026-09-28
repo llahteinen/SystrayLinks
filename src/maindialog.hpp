@@ -1,6 +1,7 @@
 #ifndef MAINDIALOG_HPP
 #define MAINDIALOG_HPP
 
+#include "tray.hpp"
 #include <QDialog>
 #include <QSystemTrayIcon>
 
@@ -9,6 +10,7 @@ namespace Ui { class MainDialog; }
 class QMenu;
 QT_END_NAMESPACE
 
+
 class MainDialog : public QDialog
 {
     Q_OBJECT
@@ -16,21 +18,19 @@ class MainDialog : public QDialog
 public:
     explicit MainDialog(QWidget* parent = nullptr);
     ~MainDialog() override;
+    Q_DISABLE_COPY_MOVE(MainDialog)
 
 protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
 
-    void onTrayIconActivated(QSystemTrayIcon::ActivationReason reason);
-    void createTrayIcon();
+    /// Call this once!
+    void setupTrayIcon();
 
     Ui::MainDialog* ui;
 
-    QSystemTrayIcon* m_trayIcon{};
-    QMenu* m_trayIconLinkMenu{};
-    QMenu* m_trayIconContextMenu{};
-    QAction* m_restoreAction{};
-    QAction* m_quitAction{};
+    Tray m_tray;
+
 };
 #endif // MAINDIALOG_HPP

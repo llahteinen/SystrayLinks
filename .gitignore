@@ -1,0 +1,6 @@
+*.user
+build*/
+install*/
+.DS_Store
+.idea/
+*.lnk

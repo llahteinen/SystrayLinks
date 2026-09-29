@@ -108,10 +108,61 @@ void MainDialog::updateLinksMenu()
 
 void MainDialog::setupTrayIcon()
 {
-    connect(&m_tray, &Tray::activated, this, [this]() {
+    static constexpr bool setting_menuAlignToCursor = false;
+    static constexpr int setting_standardSpacing = 4;
+    static constexpr int setting_menuIconGap = 3 * setting_standardSpacing; /// 12 px == same as Windows 11 tray overflow menu
+
+    const auto alignMenuToIcon = [this](const QSize hint, bool /*mirror*/) -> QPoint {
+        /// Anchor bottom-left of the menu at the cursor to open it upward
+        /// like the native tray menu.
+        /// Make the direction customizable!
+        int offset_vertical = m_tray.trayIcon().geometry().top(); /// Align to top of tray icon
+        offset_vertical -= setting_menuIconGap; /// Create gap
+        offset_vertical -= hint.height(); /// Move up for the height of the menu itself
+
+        int offset_horizontal = m_tray.trayIcon().geometry().center().x(); /// Align to center of tray icon
+        offset_horizontal -= hint.width() / 2; /// Move left half for the width of the menu
+
+        QPoint p(offset_horizontal, offset_vertical);
+        /// Right-align if the menu would overflow the right screen edge ?
+        /// If we align to center of the icon, it is not super mandatory though because Qt or Windows automatically keep the whole menu inside the screen area.
+        /// But if there is option to align right
+        const QRect avail = m_linksMenu.screen()->availableGeometry();
+        if(p.x() + hint.width() > avail.right())
+        {
+            p = m_tray.trayIcon().geometry().topRight() - QPoint(hint.width(), hint.height()); /// Open the menu above the tray icon openig to the left
+        }
+        return p;
+    };
+    const auto alignMenuToCursor = [this](const QSize hint, bool /*mirror*/) -> QPoint {
+        /// QMenu::popup sets the menu bottom left on the given coordinate == "opens to the right"
+        const auto cursor = QCursor::pos();
+        QPoint p = cursor - QPoint(0, hint.height()); /// Move up for the height of the menu itself
+
+        /// Open to the left if the menu would overflow the right screen edge
+        const QRect avail = m_linksMenu.screen()->availableGeometry();
+        if(p.x() + hint.width() > avail.right())
+        {
+            p.setX(cursor.x() - hint.width()); /// Mirror the menu to the left from the cursor tip
+        }
+        return p;
+    };
+
+    connect(&m_tray, &Tray::activated, this, [=, this]() {
         qDebug() << "activated";
         updateLinksMenu();
-        m_linksMenu.popup(QCursor::pos());
+
+        const QSize hint = m_linksMenu.sizeHint();
+        QPoint p;
+        if(setting_menuAlignToCursor)
+        {
+            p = alignMenuToCursor(hint, false);
+        }
+        else
+        {
+            p = alignMenuToIcon(hint, false);
+        }
+        m_linksMenu.popup(p);
     });
 
     connect(&m_tray, &Tray::restoreTriggered, this, [this]() {

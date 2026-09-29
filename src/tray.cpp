@@ -19,6 +19,11 @@ void Tray::onActivated(QSystemTrayIcon::ActivationReason reason)
     qDebug() << "onActivated" << reason;
     switch(reason)
     {
+    case QSystemTrayIcon::Context:
+        {
+            emit contextActivated();
+            break;
+        }
     case QSystemTrayIcon::Trigger:
         {
             emit activated();

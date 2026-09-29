@@ -11,6 +11,7 @@ MainDialog::MainDialog(QWidget* parent)
     , m_tray{} /// No parent for value member QObject
     , m_linksMenu{}
     , m_model{new QFileSystemModel()}
+    , m_linksMenuIsOpen{false}
 {
     ui->setupUi(this);
 
@@ -23,6 +24,25 @@ MainDialog::MainDialog(QWidget* parent)
 
     setupTrayIcon();
     m_tray.trayIcon().show();
+
+    connect(&m_linksMenu, &QMenu::aboutToHide, this, [this]() {
+        qDebug() << "aboutToHide";
+        /// Check if the hiding of the menu happened because of a click ON the tray icon.
+        /// In that case we want the menu to close, and not to reopen when the mouse is realeased.
+        /// For that we need to block the reopen
+        if(m_tray.trayIcon().geometry().contains(QCursor::pos()))
+        {
+            /// Dismissed by clicking on the tray icon, menu should not be reopened when mouse releases.
+            /// Tray::activated will fire now and will set m_linksMenuIsOpen to false.
+            /// NOTE that there might be edge case if programmatically closing the menu while mouse happens to be on the icon.
+            /// That happens also when double clicking, so we handle that as well
+        }
+        else
+        {
+            /// Dismissed somewhere else or spontaneously, next click on the tray icon should open the menu
+            m_linksMenuIsOpen = false;
+        }
+    });
 }
 
 MainDialog::~MainDialog()
@@ -106,6 +126,15 @@ void MainDialog::updateLinksMenu()
     }
 }
 
+void MainDialog::closeLinksMenu(bool check)
+{
+    m_linksMenuIsOpen = false;
+    if(!check || m_linksMenu.isVisible())
+    {
+        m_linksMenu.hide();
+    }
+}
+
 void MainDialog::setupTrayIcon()
 {
     static constexpr bool setting_menuAlignToCursor = false;
@@ -150,6 +179,22 @@ void MainDialog::setupTrayIcon()
 
     connect(&m_tray, &Tray::activated, this, [=, this]() {
         qDebug() << "activated";
+
+        /// Every other click should open the menu and every other close it.
+        /// Close happens when clicking anywhere on the screen, including on the tray icon.
+        /// Problem is that at least on Windows the mouse down event already closes the menu, so
+        /// we can't track its isVisible flag in Tray::activated because it emits later.
+        /// We use this flag to track if the menu should be open and therefore not triggered to open again
+        if(m_linksMenuIsOpen)
+        {
+            /// We should rather close the menu on this activation instead of reopening it
+            closeLinksMenu();
+            return;
+        }
+
+        /// Else open the menu
+        m_linksMenuIsOpen = true;
+
         updateLinksMenu();
 
         const QSize hint = m_linksMenu.sizeHint();
@@ -169,6 +214,13 @@ void MainDialog::setupTrayIcon()
         qDebug() << "restoreTriggered";
         showNormal(); /// Window "restore" action
         activateWindow(); /// Make the dialog foreground if user had clicked something else
+
+        closeLinksMenu();
+    });
+
+    connect(&m_tray, &Tray::contextActivated, this, [this]() {
+        qDebug() << "contextActivated";
+        closeLinksMenu();
     });
 
     connect(&m_tray, &Tray::quitTriggered, qApp, &QCoreApplication::quit);

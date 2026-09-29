@@ -28,6 +28,8 @@ private:
 
     void updateLinksMenu();
 
+    void closeLinksMenu(bool check = true);
+
     /// Call this once!
     void setupTrayIcon();
 
@@ -36,6 +38,8 @@ private:
     Tray m_tray;
     QMenu m_linksMenu;
     QFileSystemModel* m_model;
+
+    bool m_linksMenuIsOpen;     ///< Used to track whether the menu should be opened or closed on tray clicks
 
 };
 #endif // MAINDIALOG_HPP

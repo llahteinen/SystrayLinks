@@ -25,6 +25,7 @@ public:
 
 signals:
     void activated();
+    void contextActivated();
     void restoreTriggered();
     void quitTriggered();
 

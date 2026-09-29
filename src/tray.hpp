@@ -24,6 +24,7 @@ public:
     void createTrayIcon();
 
 signals:
+    void activated();
     void restoreTriggered();
     void quitTriggered();
 

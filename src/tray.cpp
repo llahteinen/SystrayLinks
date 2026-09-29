@@ -21,6 +21,7 @@ void Tray::onActivated(QSystemTrayIcon::ActivationReason reason)
     {
     case QSystemTrayIcon::Trigger:
         {
+            emit activated();
             break;
         }
     case QSystemTrayIcon::DoubleClick:

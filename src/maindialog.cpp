@@ -8,14 +8,22 @@
 MainDialog::MainDialog(QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::MainDialog)
+    , m_settings{}
     , m_tray{} /// No parent for value member QObject
     , m_linksMenu{}
     , m_model{new QFileSystemModel()}
     , m_linksMenuIsOpen{false}
 {
+    qInfo() << PROJECT_NAME << "starting";
+
+    m_settings.loadFromStore();
+
     ui->setupUi(this);
 
-    m_model->setRootPath(R"(E:\Kikkareita\linkit)");
+    setWindowTitle(QString("%1").arg(APPLICATION_NAME));
+
+
+    m_model->setRootPath(m_settings.getLinkPath());
     m_model->setFilter(//QDir::AllEntries | QDir::NoDotAndDotDot);
             QDir::AllEntries
             | QDir::NoDotAndDotDot
@@ -47,6 +55,7 @@ MainDialog::MainDialog(QWidget* parent)
 
 MainDialog::~MainDialog()
 {
+    m_settings.persistToStore();
     delete ui;
 }
 

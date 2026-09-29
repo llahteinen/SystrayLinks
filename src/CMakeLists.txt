@@ -7,6 +7,8 @@ qt_add_executable(${PROJECT_NAME}
     maindialog.ui
     tray.cpp
     tray.hpp
+    settings.cpp
+    settings.hpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -19,6 +21,13 @@ target_link_libraries(${PROJECT_NAME}
         Qt::Core
         Qt::Widgets
 )
+
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE APPLICATION_NAME="$<IF:$<CONFIG:Debug>,${PROJECT_NAME}_dbg,${PROJECT_NAME}>")
+target_compile_definitions(${PROJECT_NAME} PRIVATE ORGANIZATION_NAME="${ORGANIZATION_NAME}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE ORGANIZATION_DOMAIN="${ORGANIZATION_DOMAIN}")
+
 
 install(TARGETS ${PROJECT_NAME}
     BUNDLE  DESTINATION .

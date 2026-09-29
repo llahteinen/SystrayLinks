@@ -1,6 +1,7 @@
 #ifndef MAINDIALOG_HPP
 #define MAINDIALOG_HPP
 
+#include "settings.hpp"
 #include "tray.hpp"
 #include <QDialog>
 #include <QSystemTrayIcon>
@@ -35,6 +36,7 @@ private:
 
     Ui::MainDialog* ui;
 
+    Settings m_settings;
     Tray m_tray;
     QMenu m_linksMenu;
     QFileSystemModel* m_model;

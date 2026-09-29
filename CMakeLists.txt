@@ -4,6 +4,11 @@ project(SystrayLinks LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
+set(ORGANIZATION_NAME "llahteinen")
+set(ORGANIZATION_DOMAIN "llahteinen.com") # NOTE: fake domain
+
+
 if (MSVC)
 #    add_compile_options($<$<CONFIG:Release>:/O1>) # O2 is MSVC default
     add_compile_options(/W4)     # Enable all normal warnings (Level 1–4)

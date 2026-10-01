@@ -7,8 +7,11 @@ qt_add_executable(${PROJECT_NAME}
     maindialog.ui
     tray.cpp
     tray.hpp
+    linksmenu.cpp
+    linksmenu.hpp
     settings.cpp
     settings.hpp
+    sortproxy.hpp
 )
 
 target_include_directories(${PROJECT_NAME}

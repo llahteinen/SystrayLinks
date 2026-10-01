@@ -20,12 +20,24 @@ public:
     void setLinkPath(const QString& path);
     const QString& getLinkPath() const;
 
+    void setItemLimit(int newItemLimit);
+    int getItemLimit() const;
+
+    void setSortCondition(int newSortCondition);
+    int getSortCondition() const;
+
+    void setSortDirection(Qt::SortOrder newSortDirection);
+    Qt::SortOrder getSortDirection() const;
+
 
 private:
     /// Give sensible default values here
     struct Persistables
     {
         QString linkPath{QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation)}; /// Points to Start Menu\Programs on Windows
+        int itemLimit{15};
+        int sortCondition{3};
+        Qt::SortOrder sortDirection{Qt::DescendingOrder};
     } m_pers;
 
 signals:

@@ -30,3 +30,33 @@ const QString& Settings::getLinkPath() const
     return m_pers.linkPath;
 }
 
+void Settings::setItemLimit(int newItemLimit)
+{
+    m_pers.itemLimit = newItemLimit;
+}
+
+int Settings::getItemLimit() const
+{
+    return m_pers.itemLimit;
+}
+
+void Settings::setSortCondition(int newSortCondition)
+{
+    m_pers.sortCondition = newSortCondition;
+}
+
+int Settings::getSortCondition() const
+{
+    return m_pers.sortCondition;
+}
+
+void Settings::setSortDirection(Qt::SortOrder newSortDirection)
+{
+    m_pers.sortDirection = newSortDirection;
+}
+
+Qt::SortOrder Settings::getSortDirection() const
+{
+    return m_pers.sortDirection;
+}
+

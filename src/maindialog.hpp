@@ -3,6 +3,7 @@
 
 #include "settings.hpp"
 #include "tray.hpp"
+#include "linksmenu.hpp"
 #include <QDialog>
 #include <QSystemTrayIcon>
 #include <QMenu>
@@ -27,8 +28,6 @@ protected:
 
 private:
 
-    void updateLinksMenu();
-
     void closeLinksMenu(bool check = true);
 
     /// Call this once!
@@ -38,7 +37,7 @@ private:
 
     Settings m_settings;
     Tray m_tray;
-    QMenu m_linksMenu;
+    LinksMenu m_linksMenu;
     QFileSystemModel* m_model;
 
     bool m_linksMenuIsOpen;     ///< Used to track whether the menu should be opened or closed on tray clicks

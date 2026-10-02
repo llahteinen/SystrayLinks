@@ -33,7 +33,7 @@ void LinksMenu::updateMenu()
     auto& menu = *this;
     menu.clear();
     /// Should set maximum size for the menu so that the bottom edge doesn't overlap the icon
-    menu.setFont(m_settings.getFont());
+    menu.setFont(m_settings.getMenuFont());
 
     m_sortProxy->sort(m_settings.getSortCondition(), m_settings.getSortDirection());
     /// I think it sorts by the target of shortcuts not the link itself

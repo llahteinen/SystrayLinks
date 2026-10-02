@@ -3,10 +3,11 @@
 #include "styles.hpp"
 #include <QCloseEvent>
 #include <QFileSystemModel>
+#include <QFileDialog>
 
 
 MainDialog::MainDialog(QWidget* parent)
-    : QDialog(parent)
+    : QWidget(parent)
     , ui(new Ui::MainDialog)
     , m_settings{}
     , m_tray{} /// No parent for value member QObject
@@ -20,11 +21,23 @@ MainDialog::MainDialog(QWidget* parent)
 
     ui->setupUi(this);
 
+    setWindowFlag(Qt::WindowMinMaxButtonsHint, false);
+    setWindowFlag(Qt::WindowMinimizeButtonHint, true);
+    setWindowFlag(Qt::WindowFullscreenButtonHint, false);
+
     setWindowTitle(QString("%1").arg(APPLICATION_NAME));
 
 
-    m_linksMenu.setRootPath(m_settings.getLinkPath());
+    connectSettings();
+    m_settings.emitAllSettingsChanged();
+    connectUi();
 
+    setFont(m_settings.getAppFont());
+    qApp->setStyleSheet(Styles::styleSheetWindow());
+
+    recalculateUiSizes();
+
+    /// Set styleSheetLinksMenu only for links menu to not restyle this dialog's context menus
     m_linksMenu.setStyleSheet(Styles::styleSheetLinksMenu());
 
     setupTrayIcon();
@@ -66,6 +79,103 @@ void MainDialog::closeEvent(QCloseEvent* event)
         hide();
         event->ignore();
     }
+}
+
+void MainDialog::connectSettings()
+{
+    connect(&m_settings, &Settings::linkPathChanged, &m_linksMenu, &LinksMenu::setRootPath);
+
+    /// Connect settings to ui elements
+    connect(&m_settings, &Settings::linkPathChanged, ui->linkPath_lineEdit, &QLineEdit::setText);
+
+    connect(&m_settings, &Settings::itemLimitChanged, ui->itemLimit_spinBox, &QSpinBox::setValue);
+
+    connect(&m_settings, &Settings::sortConditionChanged, ui->sortType_comboBox, &QComboBox::setCurrentIndex);
+    connect(&m_settings, &Settings::sortConditionChanged, ui->sortDirection_comboBox, [this](int sort) {
+        ui->sortDirection_comboBox->clear();
+        QStringList items;
+        switch(sort)
+        {
+        case 1: /// Size
+            items = {"Smallest first", "Largest first"};
+            break;
+        case 3: /// Time
+            items = {"Oldest first", "Newest first"};
+            break;
+        case 0: /// Name
+        case 2: /// Type
+        default:
+            items = {"A to Z", "Z to A"};
+            break;
+        }
+        ui->sortDirection_comboBox->addItems(items);
+    });
+    connect(&m_settings, &Settings::sortDirectionChanged, ui->sortDirection_comboBox, &QComboBox::setCurrentIndex);
+
+    connect(&m_settings, &Settings::menuFontChanged, ui->fontFamily_lineEdit, [this](const QFont& font) {
+        ui->fontFamily_lineEdit->setText(font.family());
+    });
+    connect(&m_settings, &Settings::menuFontChanged, ui->fontSizePx_spinBox, [this](const QFont& font) {
+        /// QFont contains only either pt size or pixel size, but not both - the other is always -1
+        ui->fontSizePx_spinBox->setValue(font.pixelSize());
+    });
+}
+
+void MainDialog::connectUi()
+{
+    connect(ui->close_pushButton, &QPushButton::clicked, this, &MainDialog::close);
+    connect(ui->shutdown_pushButton, &QPushButton::clicked, this, &QApplication::exit);
+
+
+    connect(ui->linkPath_lineEdit, &QLineEdit::editingFinished, &m_settings, [this]() {
+        m_settings.setLinkPath(ui->linkPath_lineEdit->text());
+    });
+    connect(ui->linkPath_pushButton, &QPushButton::clicked, this, [this]() {
+        const QString dir = QFileDialog::getExistingDirectory(
+            this, tr("Select Directory"), m_settings.getLinkPath(),
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        if(!dir.isEmpty())
+        {
+            m_settings.setLinkPath(QDir::toNativeSeparators(dir));
+        }
+    });
+
+    connect(ui->itemLimit_spinBox, &QSpinBox::valueChanged, &m_settings, &Settings::setItemLimit);
+
+    connect(ui->sortType_comboBox, &QComboBox::currentIndexChanged, &m_settings, &Settings::setSortCondition);
+    connect(ui->sortDirection_comboBox, &QComboBox::currentIndexChanged, &m_settings, [this](int index) {
+        m_settings.setSortDirection(index == 0 ? Qt::SortOrder::AscendingOrder : Qt::SortOrder::DescendingOrder);
+    });
+
+    connect(ui->fontFamily_lineEdit, &QLineEdit::editingFinished, &m_settings, [this]() {
+        auto font = m_settings.getMenuFont();
+        font.setFamily(ui->fontFamily_lineEdit->text());
+        m_settings.setMenuFont(font);
+    });
+    connect(ui->fontSizePx_spinBox, &QSpinBox::valueChanged, &m_settings, &Settings::setMenuFontPxSize);
+
+}
+
+/// This should be called after spinbox settings are set and combobox items are populated
+/// and font sizes etc are set
+void MainDialog::recalculateUiSizes()
+{
+    /// Set spinboxes to same width
+    int size_hint = qMax(ui->itemLimit_spinBox->sizeHint().width(), ui->fontSizePx_spinBox->sizeHint().width());
+    ui->itemLimit_spinBox->setMinimumWidth(size_hint);
+    ui->itemLimit_spinBox->setMaximumWidth(size_hint);
+    ui->fontSizePx_spinBox->setMinimumWidth(size_hint);
+    ui->fontSizePx_spinBox->setMaximumWidth(size_hint);
+
+//    /// Set comboboxes to longest content width and same width
+////    size_hint = qMax(ui->sortType_comboBox->sizeHint().width(), ui->sortDirection_comboBox->sizeHint().width());
+//    size_hint = ui->sortType_comboBox->sizeHint().width();
+//    ui->sortType_comboBox->setMinimumWidth(size_hint);
+//    ui->sortType_comboBox->setMaximumWidth(size_hint);
+////    size_hint = qMax(ui->sortType_comboBox->sizeHint().width(), ui->sortDirection_comboBox->sizeHint().width());
+//    size_hint = ui->sortDirection_comboBox->sizeHint().width();
+//    ui->sortDirection_comboBox->setMinimumWidth(size_hint);
+//    ui->sortDirection_comboBox->setMaximumWidth(size_hint);
 }
 
 void MainDialog::closeLinksMenu(bool check)

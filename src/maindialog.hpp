@@ -5,8 +5,6 @@
 #include "tray.hpp"
 #include "linksmenu.hpp"
 #include <QDialog>
-#include <QSystemTrayIcon>
-#include <QMenu>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainDialog; }
@@ -14,7 +12,7 @@ class QFileSystemModel;
 QT_END_NAMESPACE
 
 
-class MainDialog : public QDialog
+class MainDialog : public QWidget
 {
     Q_OBJECT
 
@@ -27,6 +25,10 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+
+    void recalculateUiSizes();
+    void connectSettings();
+    void connectUi();
 
     void closeLinksMenu(bool check = true);
 

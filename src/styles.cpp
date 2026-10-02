@@ -47,6 +47,38 @@ QMenu::item:selected {    /* Hover effect */
 }
 )";
 
+constexpr auto styleSheetWindow = R"(
+QToolTip {
+/* Can't seem to get different horizontal and vertical padding. Compromise. */
+    padding: 6px;
+    background-color: rgb(249, 249, 249);   /* LayerFillColorDefaultBrush */
+/*    border: 1px solid rgb(229, 0, 229);*/     /* No effect. ControlElevationBorderBrush */
+/*    border: 0px;*/    /* No effect either */
+}
+QLabel[role="subtitle"] {
+    margin-top: 8px;
+    margin-bottom: 6px; /* plus layout spacing == 8 */
+}
+QFrame[role="card"] {
+    background: rgb(251, 251, 251);         /* CardBackgroundFillColorDefaultBrush */
+    border: 1px solid rgb(229, 229, 229);   /* ControlElevationBorderBrush */
+    border-radius: 4px;
+    margin-top: 0px;
+    margin-bottom: 0px;     /* plus layout spacing == 3px */
+    margin-left: 2px;       /* With this, it's same level as buttons */
+    margin-right: 2px;
+    padding: 16px;
+    padding-right: 12px;
+}
+/* Works for the dropdown menu itself, but it seems to be quite OK by default already */
+QComboBox QAbstractItemView {
+    padding: 4px;
+}
+QComboBox QAbstractItemView::item {
+    padding: 2px 8px; /* V H gives 33px total height */
+}
+)";
+
 /// These are glyph codes in the Fluent UI / WinUI 3 icon set, Segoe Fluent Icons
 constexpr std::array iconKeys =
 {
@@ -75,5 +107,10 @@ const QString& Styles::styleSheetLinksMenu()
 {
     static const QString style_str{::styleSheetLinksMenu};
     return style_str;
+}
+
+QString Styles::styleSheetWindow()
+{
+    return {::styleSheetWindow};
 }
 

@@ -25,6 +25,7 @@ namespace Styles
     QIcon fluentIcon(Icons name, const QIcon& fallback);
 
     const QString& styleSheetLinksMenu();
+    QString styleSheetWindow();
 
 };
 

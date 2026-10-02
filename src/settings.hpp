@@ -15,7 +15,10 @@ class Settings : public QObject
 public:
     explicit Settings(QObject* parent = nullptr);
 
-    void persistToStore();
+    void setAppFont(const QFont& font);
+    QFont getAppFont() const;
+
+    void persistToStore() const;
     void loadFromStore();
 
     void setLinkPath(const QString& path);
@@ -30,10 +33,16 @@ public:
     void setSortDirection(Qt::SortOrder newSortDirection);
     Qt::SortOrder getSortDirection() const;
 
-    void setFont(const QFont& font);
-    QFont getFont() const;
+    void setMenuFont(const QFont& font);
+    void setMenuFontPxSize(int size);
+    QFont getMenuFont() const;
+
+    void emitAllSettingsChanged();
 
 private:
+
+    QFont appFont;
+
     /// Give sensible default values here
     struct Persistables
     {
@@ -55,6 +64,11 @@ private:
     } m_pers;
 
 signals:
+    void linkPathChanged(const QString& path);
+    void itemLimitChanged(int limit);
+    void sortConditionChanged(int sort);
+    void sortDirectionChanged(Qt::SortOrder sortDirection);
+    void menuFontChanged(const QFont& font);
 
 };
 

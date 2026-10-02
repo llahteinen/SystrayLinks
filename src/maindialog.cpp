@@ -1,5 +1,6 @@
 #include "maindialog.hpp"
 #include "ui_maindialog.h"
+#include "styles.hpp"
 #include <QCloseEvent>
 #include <QFileSystemModel>
 
@@ -23,6 +24,8 @@ MainDialog::MainDialog(QWidget* parent)
 
 
     m_linksMenu.setRootPath(m_settings.getLinkPath());
+
+    m_linksMenu.setStyleSheet(Styles::styleSheetLinksMenu());
 
     setupTrayIcon();
     m_tray.trayIcon().show();
@@ -164,7 +167,8 @@ void MainDialog::setupTrayIcon()
 
     connect(&m_tray, &Tray::quitTriggered, qApp, &QCoreApplication::quit);
 
-    QIcon icon = QIcon::fromTheme("emblem-favorite");
+    const QIcon icon_fb = QIcon::fromTheme("emblem-favorite"); /// Fallback from XDG icon set
+    const auto icon = Styles::fluentIcon(Styles::Icons::HeartFill, icon_fb);
     m_tray.trayIcon().setIcon(icon);
     setWindowIcon(icon);
 }

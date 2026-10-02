@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QStandardPaths>
+#include <QFont>
 
 
 class Settings : public QObject
@@ -29,6 +30,8 @@ public:
     void setSortDirection(Qt::SortOrder newSortDirection);
     Qt::SortOrder getSortDirection() const;
 
+    void setFont(const QFont& font);
+    QFont getFont() const;
 
 private:
     /// Give sensible default values here
@@ -38,6 +41,17 @@ private:
         int itemLimit{15};
         int sortCondition{3};
         Qt::SortOrder sortDirection{Qt::DescendingOrder};
+        QFont menuFont{};
+
+        Persistables()
+        {
+            /// https://learn.microsoft.com/en-us/windows/apps/design/signature-experiences/typography
+            /// The example uses the "Text" variant for 14 to 18 px font. 12 px uses "Small"
+            /// "Use Semibold instead of Bold for emphasis."
+            menuFont.setFamily("Segoe UI Variable Text");
+            menuFont.setPixelSize(14); /// Fluent UI Body text 14 epx. In Qt 6 pixelSize should be safe over different scalings
+        }
+
     } m_pers;
 
 signals:

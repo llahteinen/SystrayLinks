@@ -60,3 +60,13 @@ Qt::SortOrder Settings::getSortDirection() const
     return m_pers.sortDirection;
 }
 
+void Settings::setFont(const QFont& font)
+{
+    m_pers.menuFont = font;
+}
+
+QFont Settings::getFont() const
+{
+    return m_pers.menuFont;
+}
+

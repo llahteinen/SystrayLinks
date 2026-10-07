@@ -14,6 +14,8 @@ qt_add_executable(${PROJECT_NAME}
     sortproxy.hpp
     styles.cpp
     styles.hpp
+    gui/appproxystyle.cpp
+    gui/appproxystyle.hpp
 )
 
 target_include_directories(${PROJECT_NAME}

@@ -1,6 +1,7 @@
 #include "maindialog.hpp"
 #include "ui_maindialog.h"
 #include "styles.hpp"
+#include "gui/appproxystyle.hpp"
 #include <QCloseEvent>
 #include <QFileSystemModel>
 #include <QFileDialog>
@@ -34,6 +35,7 @@ MainDialog::MainDialog(QWidget* parent)
 
     setFont(m_settings.getAppFont());
     qApp->setStyleSheet(Styles::styleSheetWindow());
+    qApp->setStyle(new AppProxyStyle); /// Ownership of the style object is transferred to QApplication
 
     recalculateUiSizes();
 
@@ -162,6 +164,7 @@ void MainDialog::recalculateUiSizes()
 {
     /// Set spinboxes to same width
     int size_hint = qMax(ui->itemLimit_spinBox->sizeHint().width(), ui->fontSizePx_spinBox->sizeHint().width());
+    size_hint += 12; /// Add some margin
     ui->itemLimit_spinBox->setMinimumWidth(size_hint);
     ui->itemLimit_spinBox->setMaximumWidth(size_hint);
     ui->fontSizePx_spinBox->setMinimumWidth(size_hint);

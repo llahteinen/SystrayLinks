@@ -3,6 +3,7 @@
 #include <QAbstractSpinBox>
 #include <QComboBox>
 #include <QLineEdit>
+#include <QAbstractItemView>
 #include <QFont>
 #include <QRect>
 #include <QSize>
@@ -120,6 +121,50 @@ QRect AppProxyStyle::subControlRect(ComplexControl cc, const QStyleOptionComplex
     return r;
 }
 
+QRect AppProxyStyle::subElementRect(SubElement sr, const QStyleOption* option, const QWidget* widget) const
+{
+    /// Combobox contents / menu
+    if(widget && qobject_cast<const QAbstractItemView*>(widget))
+    {
+        /// Style the icons, does not affect contents without icons
+        if(sr == SE_ItemViewItemDecoration)
+        {
+            if(const auto* vi = qstyleoption_cast<const QStyleOptionViewItem*>(option))
+            {
+                QStyleOptionViewItem new_option = *vi;
+                /// For whatever reason the 16x16 icon is actually drawn smaller unless we set size to 18
+                /// Same is true for 24 that becomes 22
+                new_option.decorationSize.setWidth(18);
+                new_option.decorationSize.setHeight(18);
+                QRect r = QProxyStyle::subElementRect(sr, &new_option, widget);
+                /// Add padding before the icon
+                r.translate(4, 0);
+                return r;
+            }
+        }
+        /// Style the text, affects with or without icons
+        else if(sr == SE_ItemViewItemText)
+        {
+            if(const auto* vi = qstyleoption_cast<const QStyleOptionViewItem*>(option))
+            {
+                QRect r = QProxyStyle::subElementRect(sr, option, widget);
+                /// Add more right spacing when no icon
+                if(!vi->features.testFlag(QStyleOptionViewItem::HasDecoration))
+                {
+                    r.translate(4, 0);
+                }
+                else
+                {
+                    /// or more gap between the icon and text
+                    r.translate(4 + 4, 0);
+                }
+                return r;
+            }
+        }
+    }
+    return QProxyStyle::subElementRect(sr, option, widget);
+}
+
 void AppProxyStyle::drawControl(ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
 {
     if(element == CE_PushButtonLabel)
@@ -131,6 +176,26 @@ void AppProxyStyle::drawControl(ControlElement element, const QStyleOption* opti
             /// Move text up 1px
             opt.rect.translate(0, -1);
             QProxyStyle::drawControl(element, &opt, painter, widget);
+            return;
+        }
+    }
+    /// Combobox itself
+    if(element == CE_ComboBoxLabel)
+    {
+        if(const auto* cb = qstyleoption_cast<const QStyleOptionComboBox*>(option))
+        {
+            QStyleOptionComboBox new_option = *cb;
+            /// The actual implementation is in QCommonStyle::drawControl and the gaps are hard-coded
+            if(const auto box = qobject_cast<const QComboBox*>(widget))
+            {
+                if(!box->itemIcon(box->currentIndex()).isNull()) /// Or maybe we could use userData
+                {
+                    new_option.iconSize.rwidth() += 2 * 6; /// Add the margins to the icon width (seems bit of a hack)
+                    new_option.rect.adjust(-6,0,0,0); /// Compensate right margin for the added icon width
+                }
+            }
+
+            QProxyStyle::drawControl(element, &new_option, painter, widget);
             return;
         }
     }
@@ -185,4 +250,13 @@ void AppProxyStyle::polish(QWidget* widget)
         font.setVariableAxis("wght", FONT_WEIGHT_SEMIBOLD);
         widget->setFont(font);
     }
+}
+
+void IconDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    QStyleOptionViewItem opt = option;
+    /// Temporarily clear the Selected state so the icon draws in Normal mode
+    /// because selected mode inverts the color
+    opt.state &= ~QStyle::State_Selected;
+    QStyledItemDelegate::paint(painter, opt, index);
 }

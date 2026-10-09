@@ -2,6 +2,7 @@
 #define APPPROXYSTYLE_HPP
 
 #include <QProxyStyle>
+#include <QStyledItemDelegate>
 #include <QWidget>
 
 inline constexpr int FLUENT_CONTROL_HEIGHT = 32;
@@ -31,11 +32,21 @@ public:
 
     QRect subControlRect(ComplexControl cc, const QStyleOptionComplex* option, SubControl sc, const QWidget* widget) const override;
 
+    QRect subElementRect(SubElement sr, const QStyleOption* option, const QWidget* widget) const override;
+
     void drawControl(ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const override;
 
     void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const override;
 
     void polish(QWidget* widget) override;
+};
+
+class IconDelegate : public QStyledItemDelegate
+{
+Q_OBJECT
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 };
 
 

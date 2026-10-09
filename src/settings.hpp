@@ -1,6 +1,7 @@
 #ifndef SETTINGS_HPP
 #define SETTINGS_HPP
 
+#include "styles.hpp"
 #include <QObject>
 #include <QStandardPaths>
 #include <QFont>
@@ -23,6 +24,9 @@ public:
 
     void setLinkPath(const QString& path);
     const QString& getLinkPath() const;
+
+    void setIcon(QChar glyph);
+    QChar getIcon() const;
 
     void setItemLimit(int newItemLimit);
     int getItemLimit() const;
@@ -47,6 +51,7 @@ private:
     struct Persistables
     {
         QString linkPath{QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation)}; /// Points to Start Menu\Programs on Windows
+        QChar iconGlyph{Styles::fluentIconGlyph(Styles::Icons::Default)};
         int itemLimit{15};
         int sortCondition{3};
         Qt::SortOrder sortDirection{Qt::DescendingOrder};
@@ -65,6 +70,7 @@ private:
 
 signals:
     void linkPathChanged(const QString& path);
+    void iconChanged(QChar glyph);
     void itemLimitChanged(int limit);
     void sortConditionChanged(int sort);
     void sortDirectionChanged(Qt::SortOrder sortDirection);

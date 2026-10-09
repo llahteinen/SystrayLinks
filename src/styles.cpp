@@ -71,25 +71,83 @@ QFrame[role="card"] {
     padding-right: 12px;
 }
 /* Works for the dropdown menu itself, but it seems to be quite OK by default already */
+/* This can't seem to be able to be adjusted in proxy style. Maybe polish QComboBox QListView setViewportMargins, but it's protected method */
 QComboBox QAbstractItemView {
     padding: 4px;
-}
-QComboBox QAbstractItemView::item {
-    padding: 2px 8px; /* V H gives 33px total height */
 }
 )";
 
 /// These are glyph codes in the Fluent UI / WinUI 3 icon set, Segoe Fluent Icons
 constexpr std::array iconKeys =
 {
-    "\uEB52", /// Default = HeartFill
-    "\uEB51", /// Heart
-    "\uEB52", /// HeartFill
-    "\uE728", /// FavoriteList
-    "\uE734", /// FavoriteStar
-    "\uE735", /// FavoriteStarFill
+    u'\uEB52', /// Default = HeartFill
+    u'\uEB51', /// Heart
+    u'\uEB52', /// HeartFill
+    u'\uE734', /// FavoriteStar
+    u'\uE735', /// FavoriteStarFill
+    u'\uE728', /// FavoriteList
+    u'\uE840', /// Pinned
+    u'\uE723', /// Attach
+    u'\uE8B7', /// Folder
+    u'\uE838', /// FolderOpen
+    u'\uEC6C', /// Favicon2
+    u'\uE8F1', /// Library
+    u'\uE896', /// Download
+    u'\uEBD3', /// CloudDownload
+    u'\uF0E2', /// GridView
+    u'\uE71D', /// AllApps
+    u'\uEA37', /// List
+    u'\uE9A4', /// TextBulletListSquare
+    u'\uE9A3', /// TextBulletListSquareSparkle
+    u'\uF6B8', /// ExpressiveInputEntry
+    u'\uEA38', /// Asterisk
+    u'\uEDAD', /// AsteriskBadge12
+    u'\uEDD7', /// CaretUp8
+    u'\uEDDB', /// CaretUpSolid8
+    u'\uF090', /// CaretSolidUp
 };
+/* Too smol but otherwise OK icons
+u'\uE71B', /// Link
+u'\uE753', /// Cloud
+u'\uE70D', /// ChevronDown
+u'\uE70E', /// ChevronUp
+u'\uE96D', /// ChevronUpSmall
+u'\uE96E', /// ChevronDownSmall
+u'\uE971', /// ChevronUpMed
+*/
 static_assert(static_cast<std::size_t>(Styles::Icons::_END) == iconKeys.size());
+}
+
+QChar Styles::fluentIconGlyph(Icons index)
+{
+    Q_ASSERT(static_cast<std::size_t>(index) < iconKeys.size());
+    if(index < Icons::_END)
+    {
+        return iconKeys[static_cast<std::size_t>(index)];
+    }
+    return iconKeys[static_cast<std::size_t>(Icons::Default)];
+}
+
+Styles::Icons Styles::fluentIconEnum(QChar glyph)
+{
+    for(std::size_t i = std::size_t(Icons::Default) + 1; i < iconKeys.size(); ++i) /// Skip default, it is duplicate of some other icon
+    {
+        if(iconKeys[i] == glyph.unicode())
+        {
+            return static_cast<Icons>(i);
+        }
+    }
+    return Icons::Default; /// fallback
+}
+
+QIcon Styles::fluentIcon(QChar glyph)
+{
+    return QIcon::fromTheme(glyph);
+}
+
+QIcon Styles::fluentIcon(QChar glyph, const QIcon& fallback)
+{
+    return QIcon::fromTheme(glyph, fallback);
 }
 
 QIcon Styles::fluentIcon(Icons name, const QIcon& fallback)
@@ -100,7 +158,18 @@ QIcon Styles::fluentIcon(Icons name, const QIcon& fallback)
 //    bool isWindows11orAbove = true;
 //    const QString assetFontName = isWindows11orAbove ? QStringLiteral("Segoe Fluent Icons") : QStringLiteral("Segoe MDL2 Assets");
 //    QIcon::setThemeName(assetFontName);
-    return QIcon::fromTheme(fluent_key, fallback);
+    return QIcon::fromTheme(QChar(fluent_key), fallback);
+}
+
+QList<QIcon> Styles::fluentIconsList()
+{
+    QList<QIcon> list;
+    for(const auto& key : iconKeys)
+    {
+        const auto icon = fluentIcon(QChar(key));
+        list.append(icon);
+    }
+    return list;
 }
 
 const QString& Styles::styleSheetLinksMenu()

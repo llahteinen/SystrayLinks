@@ -27,6 +27,7 @@ void Settings::persistToStore() const
     QSettings settings;
     settings.setValue("settingsVersion",            SETTINGS_VERSION);
     settings.setValue("Settings/linkPath",          m_pers.linkPath);
+    settings.setValue("Settings/iconGlyph",         m_pers.iconGlyph.unicode()); /// Store char16_t
     settings.setValue("Settings/itemLimit",         m_pers.itemLimit);
     settings.setValue("Settings/sortCondition",     m_pers.sortCondition);
     settings.setValue("Settings/sortDirection",     static_cast<int>(m_pers.sortDirection));
@@ -38,6 +39,8 @@ void Settings::loadFromStore()
 {
     const QSettings settings;
     m_pers.linkPath = settings.value("Settings/linkPath", m_pers.linkPath).toString();
+    const uint glyph = settings.value("Settings/iconGlyph", m_pers.iconGlyph.unicode()).toUInt(); /// Stored char16_t
+    m_pers.iconGlyph = QChar(glyph);
     m_pers.itemLimit = settings.value("Settings/itemLimit", m_pers.itemLimit).toInt();
     m_pers.sortCondition = settings.value("Settings/sortCondition", m_pers.sortCondition).toInt();
     m_pers.sortDirection = static_cast<Qt::SortOrder>(settings.value("Settings/sortDirection", static_cast<int>(m_pers.sortDirection)).toInt());
@@ -58,6 +61,7 @@ void Settings::loadFromStore()
 void Settings::emitAllSettingsChanged()
 {
     emit linkPathChanged(m_pers.linkPath);
+    emit iconChanged(m_pers.iconGlyph);
     emit itemLimitChanged(m_pers.itemLimit);
     emit sortConditionChanged(m_pers.sortCondition);
     emit sortDirectionChanged(m_pers.sortDirection);
@@ -76,6 +80,17 @@ void Settings::setLinkPath(const QString& path)
 const QString& Settings::getLinkPath() const
 {
     return m_pers.linkPath;
+}
+
+void Settings::setIcon(QChar glyph)
+{
+    m_pers.iconGlyph = glyph;
+    emit iconChanged(m_pers.iconGlyph);
+}
+
+QChar Settings::getIcon() const
+{
+    return m_pers.iconGlyph;
 }
 
 void Settings::setItemLimit(int newItemLimit)

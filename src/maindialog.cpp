@@ -5,6 +5,7 @@
 #include <QCloseEvent>
 #include <QFileSystemModel>
 #include <QFileDialog>
+#include <QMetaEnum>
 
 
 MainDialog::MainDialog(QWidget* parent)
@@ -28,6 +29,15 @@ MainDialog::MainDialog(QWidget* parent)
 
     setWindowTitle(QString("%1").arg(APPLICATION_NAME));
 
+
+    const auto icon_enum = QMetaEnum::fromType<Styles::Icons>();
+    const auto icon_list = Styles::fluentIconsList();
+    for(int i = int(Styles::Icons::Default) + 1; i < icon_list.count(); ++i) /// Don't add the default
+    {
+        const auto name = icon_enum.valueToKey(i);
+        ui->icon_comboBox->addItem(icon_list.at(i), name);
+    }
+//    ui->icon_comboBox->setItemDelegate(new IconDelegate); /// Fix icons that change color when hovered BREAKS the visualization of selected item
 
     connectSettings();
     m_settings.emitAllSettingsChanged();
@@ -121,6 +131,19 @@ void MainDialog::connectSettings()
         /// QFont contains only either pt size or pixel size, but not both - the other is always -1
         ui->fontSizePx_spinBox->setValue(font.pixelSize());
     });
+
+    connect(&m_settings, &Settings::iconChanged, ui->icon_comboBox, [this](QChar glyph) {
+        const auto icon_index = Styles::fluentIconEnum(glyph);
+        const auto combo_index = static_cast<int>(icon_index) - 1; /// ComboBox doesn't include the default
+        ui->icon_comboBox->setCurrentIndex(combo_index);
+    });
+    connect(&m_settings, &Settings::iconChanged, this, [this](QChar glyph) {
+        const auto icon_fb = QIcon::fromTheme("emblem-favorite"); /// Fallback from XDG icon set
+        const auto icon = Styles::fluentIcon(glyph, icon_fb);
+        m_tray.trayIcon().setIcon(icon);
+        setWindowIcon(icon);
+    });
+
 }
 
 void MainDialog::connectUi()
@@ -156,6 +179,11 @@ void MainDialog::connectUi()
     });
     connect(ui->fontSizePx_spinBox, &QSpinBox::valueChanged, &m_settings, &Settings::setMenuFontPxSize);
 
+    connect(ui->icon_comboBox, &QComboBox::currentIndexChanged, &m_settings, [this](int index) {
+        const auto enum_val = static_cast<Styles::Icons>(index + 1); /// No default in the combobox
+        const auto glyph = Styles::fluentIconGlyph(enum_val);
+        m_settings.setIcon(glyph);
+    });
 }
 
 /// This should be called after spinbox settings are set and combobox items are populated
@@ -280,8 +308,4 @@ void MainDialog::setupTrayIcon()
 
     connect(&m_tray, &Tray::quitTriggered, qApp, &QCoreApplication::quit);
 
-    const QIcon icon_fb = QIcon::fromTheme("emblem-favorite"); /// Fallback from XDG icon set
-    const auto icon = Styles::fluentIcon(Styles::Icons::HeartFill, icon_fb);
-    m_tray.trayIcon().setIcon(icon);
-    setWindowIcon(icon);
 }

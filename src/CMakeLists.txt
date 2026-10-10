@@ -31,6 +31,8 @@ target_link_libraries(${PROJECT_NAME}
 
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_NAME="${PROJECT_NAME}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(${PROJECT_NAME} PRIVATE PROJECT_FULL_VERSION="${PROJECT_FULL_VERSION}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE APPLICATION_NAME="$<IF:$<CONFIG:Debug>,${PROJECT_NAME}_dbg,${PROJECT_NAME}>")
 target_compile_definitions(${PROJECT_NAME} PRIVATE ORGANIZATION_NAME="${ORGANIZATION_NAME}")
 target_compile_definitions(${PROJECT_NAME} PRIVATE ORGANIZATION_DOMAIN="${ORGANIZATION_DOMAIN}")

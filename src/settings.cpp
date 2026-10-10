@@ -1,5 +1,6 @@
 #include "settings.hpp"
 #include <QSettings>
+#include <QCoreApplication>
 
 
 Settings::Settings(QObject* parent)
@@ -26,6 +27,7 @@ void Settings::persistToStore() const
 {
     QSettings settings;
     settings.setValue("settingsVersion",            SETTINGS_VERSION);
+    settings.setValue("applicationVersion",         QCoreApplication::applicationVersion());
     settings.setValue("Settings/linkPath",          m_pers.linkPath);
     settings.setValue("Settings/iconGlyph",         m_pers.iconGlyph.unicode()); /// Store char16_t
     settings.setValue("Settings/itemLimit",         m_pers.itemLimit);

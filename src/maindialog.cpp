@@ -17,7 +17,7 @@ MainDialog::MainDialog(QWidget* parent)
     , m_model{new QFileSystemModel()}
     , m_linksMenuIsOpen{false}
 {
-    qInfo() << PROJECT_NAME << "starting";
+    qInfo().noquote() << QCoreApplication::applicationName() << QCoreApplication::applicationVersion() << "starting";
 
     m_settings.loadFromStore();
 
@@ -27,7 +27,7 @@ MainDialog::MainDialog(QWidget* parent)
     setWindowFlag(Qt::WindowMinimizeButtonHint, true);
     setWindowFlag(Qt::WindowFullscreenButtonHint, false);
 
-    setWindowTitle(QString("%1").arg(APPLICATION_NAME));
+    setWindowTitle(QString("%1 v%2").arg(QApplication::applicationDisplayName(), QCoreApplication::applicationVersion()));
 
 
     const auto icon_enum = QMetaEnum::fromType<Styles::Icons>();

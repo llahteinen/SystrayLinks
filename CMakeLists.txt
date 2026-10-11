@@ -47,6 +47,12 @@ else()
 endif()
 
 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/install-${CMAKE_BUILD_TYPE}" CACHE PATH "Install prefix" FORCE)
+endif()
+message("CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}")
+
+
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 qt_standard_project_setup()
 

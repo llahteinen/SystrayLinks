@@ -44,9 +44,24 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-qt_generate_deploy_app_script(
+set(DEPLOY_OPTIONS "
+--no-system-d3d-compiler
+--no-system-dxc-compiler
+--no-opengl-sw
+--no-network
+--skip-plugin-types imageformats,iconengines
+")
+# Install everything under bin dir next to the executable
+qt6_generate_deploy_script(
     TARGET ${PROJECT_NAME}
     OUTPUT_SCRIPT deploy_script
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
+    CONTENT "
+qt_deploy_runtime_dependencies(
+    EXECUTABLE \"\${QT_DEPLOY_BIN_DIR}/$<TARGET_FILE_NAME:${PROJECT_NAME}>\"
+    BIN_DIR ${CMAKE_INSTALL_BINDIR}
+    LIB_DIR ${CMAKE_INSTALL_BINDIR}
+    PLUGINS_DIR ${CMAKE_INSTALL_BINDIR}
+    NO_TRANSLATIONS
+    DEPLOY_TOOL_OPTIONS ${DEPLOY_OPTIONS}
+)")
 install(SCRIPT ${deploy_script})
